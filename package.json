@@ -1,0 +1,27 @@
+{
+  "name": "gwangnamalim",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/tantankim1/gwangnamalim#readme",
+  "bugs": {
+    "url": "https://github.com/tantankim1/gwangnamalim/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tantankim1/gwangnamalim.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ai": "^6.0.182",
+    "axios": "^1.16.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "openai": "^6.37.0"
+  }
+}
