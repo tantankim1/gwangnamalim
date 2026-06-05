@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>광남고 오늘의 급식</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f3ec;
+      --surface: #fffdf8;
+      --border: #ddd8cc;
+      --text-primary: #1a1710;
+      --text-secondary: #6b6456;
+      --text-muted: #a09888;
+      --accent: #c0392b;
+      --accent-light: #fdf0ee;
+      --stamp: #b03020;
+    }
+
+    body {
+      font-family: 'Gowun Dodum', serif;
+      background-color: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 3rem 1rem 4rem;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,0,0,0.03) 39px, rgba(0,0,0,0.03) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,0,0,0.02) 39px, rgba(0,0,0,0.02) 40px);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      max-width: 520px;
+      width: 100%;
+      padding: 2.5rem 2.5rem 2rem;
+      position: relative;
+      box-shadow: 4px 6px 0 rgba(0,0,0,0.06), 8px 12px 0 rgba(0,0,0,0.03);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 24px, transparent 24px, transparent 30px);
+    }
+
+    .header {
+      border-bottom: 2px solid var(--text-primary);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .school-name {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .date-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.4rem;
+    }
+
+    .date-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .refresh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 10px;
+      font-family: 'Gowun Dodum', serif;
+      font-size: 11px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .refresh-btn:hover {
+      background: var(--accent-light);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Loading */
+    #loading {
+      text-align: center;
+      padding: 3rem 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Meal list */
+    #meal-content { display: none; }
+
+    .meal-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .meal-item {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px dashed var(--border);
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .meal-item:last-child {
+      border-bottom: none;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .meal-num {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 18px;
+      text-align: right;
+    }
+
+    .meal-name {
+      font-size: 15px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .note-box {
+      margin-top: 1.5rem;
+      padding: 10px 14px;
+      background: #fffbe6;
+      border: 1px solid #e8d96a;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #7a6a00;
+      line-height: 1.6;
+      display: none;
+    }
+
+    /* Error */
+    #error {
+      display: none;
+      text-align: center;
+      padding: 2.5rem 0;
+    }
+
+    .error-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .error-msg {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .error-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .retry-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 8px 20px;
+      font-family: 'Gowun Dodum', serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .retry-btn:hover { opacity: 0.85; }
+
+    /* Footer stamp */
+    .footer {
+      margin-top: 1.8rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .stamp {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 10px;
+      color: var(--stamp);
+      border: 1.5px solid var(--stamp);
+      border-radius: 3px;
+      padding: 2px 8px;
+      opacity: 0.7;
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <p class="school-name">Gwangnam High School</p>
+    <h1 class="title">오늘의 급식</h1>
+    <div class="date-line">
+      <span class="date-text" id="today-date"></span>
+      <button class="refresh-btn" onclick="fetchMeal()">새로고침</button>
+    </div>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    급식 정보를 불러오고 있어요...
+  </div>
+
+  <div id="meal-content">
+    <ul class="meal-list" id="meal-list"></ul>
+    <div class="note-box" id="note-box"></div>
+  </div>
+
+  <div id="error">
+    <div class="error-icon">🍽</div>
+    <p class="error-msg">급식 정보를 가져오지 못했어요.</p>
+    <p class="error-detail" id="error-detail"></p>
+    <button class="retry-btn" onclick="fetchMeal()">다시 시도</button>
+  </div>
+
+  <div class="footer">
+    <span class="footer-text" id="fetched-time"></span>
+    <span class="stamp">광남고</span>
+  </div>
+</div>
+
+<script>
+  const API = 'https://obscure-doodle-r4wpw4p4vgrj2xr7g-3000.app.github.dev/meal';
+
+  const now = new Date();
+  document.getElementById('today-date').textContent = now.toLocaleDateString('ko-KR', {
+    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+  });
+
+  function parseMealItems(mealData) {
+    if (!mealData) return [];
+
+    const deepSearch = (obj) => {
+      if (typeof obj === 'string') {
+        const items = obj.split(/<br\s*\/?>/i)
+          .flatMap(s => s.split('\n'))
+          .map(s => s.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim())
+          .filter(s => s.length > 1);
+        if (items.length > 1) return items;
+        return [];
+      }
+      if (Array.isArray(obj)) {
+        for (const v of obj) {
+          const r = deepSearch(v);
+          if (r.length) return r;
+        }
+      }
+      if (typeof obj === 'object' && obj !== null) {
+        const strVals = Object.entries(obj)
+          .filter(([k]) => /menu|dish|meal|food|ddish|name|이름|메뉴/i.test(k));
+        for (const [, v] of strVals) {
+          const r = deepSearch(v);
+          if (r.length) return r;
+        }
+        for (const v of Object.values(obj)) {
+          const r = deepSearch(v);
+          if (r.length) return r;
+        }
+      }
+      return [];
+    };
+
+    return deepSearch(mealData);
+  }
+
+  async function fetchMeal() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('meal-content').style.display = 'none';
+    document.getElementById('error').style.display = 'none';
+
+    try {
+      const res = await fetch(API);
+      if (!res.ok) throw new Error(`서버 오류 (HTTP ${res.status})`);
+      const data = await res.json();
+
+      const items = parseMealItems(data.meal);
+
+      if (items.length === 0) {
+        throw new Error('오늘은 급식 데이터가 없거나 형식을 읽을 수 없어요.');
+      }
+
+      const list = document.getElementById('meal-list');
+      list.innerHTML = '';
+      items.forEach((name, i) => {
+        const li = document.createElement('li');
+        li.className = 'meal-item';
+        li.style.animationDelay = `${i * 40}ms`;
+        li.innerHTML = `<span class="meal-num">${i + 1}</span><span class="meal-name">${name}</span>`;
+        list.appendChild(li);
+      });
+
+      const noteBox = document.getElementById('note-box');
+      if (data.note) {
+        noteBox.textContent = '⚠ ' + data.note;
+        noteBox.style.display = 'block';
+      } else {
+        noteBox.style.display = 'none';
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('meal-content').style.display = 'block';
+
+      const t = new Date();
+      document.getElementById('fetched-time').textContent =
+        `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')} 기준`;
+
+    } catch (e) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('error-detail').textContent = e.message;
+    }
+  }
+
+  fetchMeal();
+</script>
+</body>
+</html>

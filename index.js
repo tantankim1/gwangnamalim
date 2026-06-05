@@ -5,21 +5,22 @@ require('dotenv').config();
 
 const express = require('express');
 const axios = require('axios');
-const OpenAI = require('openai');
+const path = require('path');
+// const OpenAI = require('openai');
 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 
 // OpenAI 설정
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // JSON 데이터를 사용할 수 있게 해주는 미들웨어
 app.use(express.json());
 
-// 기본 주소
+// 기본 주소: index.html 서빙
 app.get('/', (req, res) => {
-  res.json({ message: 'Hello, Express!' });
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // 주소 뒤에 붙은 query 데이터를 받는 API
@@ -28,27 +29,27 @@ app.get('/api/data', (req, res) => {
 });
 
 // 광남고 시설 위치 안내
-app.get('/facility', async (req, res) => {
-  const description = req.query.description;
-  if (!description) {
-    return res.status(400).json({ error: 'description 쿼리 파라미터가 필요합니다.' });
-  }
+// app.get('/facility', async (req, res) => {
+//   const description = req.query.description;
+//   if (!description) {
+//     return res.status(400).json({ error: 'description 쿼리 파라미터가 필요합니다.' });
+//   }
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        { role: 'system', content: '당신은 광남고등학교 시설 위치 안내 AI입니다. 사용자의 자연어 설명에 기반하여 관련 시설의 위치 정보를 친절하게 안내하세요.' },
-        { role: 'user', content: description }
-      ]
-    });
-    const answer = response.choices[0].message.content;
-    res.json({ facility_info: answer });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'AI 호출 중 오류 발생' });
-  }
-});
+//   try {
+//     const response = await openai.chat.completions.create({
+//       model: 'gpt-3.5-turbo',
+//       messages: [
+//         { role: 'system', content: '당신은 광남고등학교 시설 위치 안내 AI입니다. 사용자의 자연어 설명에 기반하여 관련 시설의 위치 정보를 친절하게 안내하세요.' },
+//         { role: 'user', content: description }
+//       ]
+//     });
+//     const answer = response.choices[0].message.content;
+//     res.json({ facility_info: answer });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'AI 호출 중 오류 발생' });
+//   }
+// });
 
 // 광남고 시간표
 app.get('/timetable', async (req, res) => {
